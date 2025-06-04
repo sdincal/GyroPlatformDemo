@@ -1,0 +1,100 @@
+#VRML_SIM R2024b utf8
+
+WorldInfo {
+  basicTimeStep 32
+}
+
+Viewpoint {
+  orientation 0.4 0.9 0.1 1.2
+  position  1.0 1.0 1.0
+}
+
+# ─── PLATFORM FRAME ──────────────────────────────────────────────────────────────
+# A Solid node named “PLATFORM” sits at the origin, pitched, rolled, and yawed 180°.
+DEF PLATFORM Solid {
+  translation 0 0 0
+  rotation 0 0 1 3.14159             # yaw = 180° (π radians)
+  children [
+    Transform {
+      rotation 1 0 0 0.0872665        # roll = 5° (0.0872665 rad)
+      children [
+        Transform {
+          rotation 0 1 0 0.0523599    # pitch = 3° (0.0523599 rad)
+          children [
+            # Draw red/green/blue lines for the platform’s X/Y/Z axes
+            Shape {
+              appearance Appearance { 
+                material Material { diffuseColor 1 0 0 }  # red for +X
+              }
+              geometry IndexedLineSet {
+                coord Coordinate { 
+                  point [
+                    0 0 0,   0.2 0 0,   # +X axis (red)
+                    0 0 0,   0 0.2 0,   # +Y axis (green)
+                    0 0 0,   0 0 0.2    # +Z axis (blue)
+                  ]
+                }
+                coordIndex [ 
+                  0,1,-1,   2,3,-1,   4,5,-1 
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+# ─── GYRO FRAME ───────────────────────────────────────────────────────────────────
+# The “GYRO” Solid is a child of PLATFORM, displaced by a fixed lever-arm.
+# The “controller” field below tells Webots to run gyro_controller.py every timestep.
+DEF GYRO_TRANSFORM Transform {
+  translation 0.01 -0.02 -0.15       # ΔX = +0.01 m (south), ΔY = –0.02 m (west), ΔZ = –0.15 m (down)
+  children [
+    DEF GYRO Solid {
+      controller "gyro_controller"    # Webots will look for gyro_controller.py
+      translation 0 0 0
+      rotation 0 0 1 0               # initial yaw = 0 (controller will override)
+      children [
+        Transform {
+          rotation 1 0 0 0           # initial roll = 0 (controller will override)
+          children [
+            Transform {
+              rotation 0 1 0 0       # initial pitch = 0 (controller will override)
+              children [
+                # Draw blue lines for the gyro’s X/Y/Z axes
+                Shape {
+                  appearance Appearance {
+                    material Material { diffuseColor 0 0 1 }  # blue
+                  }
+                  geometry IndexedLineSet {
+                    coord Coordinate { 
+                      point [
+                        0 0 0,   0.15 0 0,   # +X axis (blue)
+                        0 0 0,   0 0.15 0,   # +Y axis (blue)
+                        0 0 0,   0 0 0.15    # +Z axis (blue)
+                      ]
+                    }
+                    coordIndex [ 
+                      0,1,-1,   2,3,-1,   4,5,-1 
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+# ─── OPTIONAL FLOOR GRID ────────────────────────────────────────────────────────
+Floor {
+  size            5 5
+  texture         "checkerboard.png"
+  translation     0 0 -0.0001
+  color           0.9 0.9 0.9
+  reflection      0.0
+}
